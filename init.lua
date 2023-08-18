@@ -1,8 +1,45 @@
---  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
-vim.g.mapleader = ' '
-vim.g.maplocalleader = ' '
+--[[
 
-vim.cmd.colorscheme 'torte'
+=====================================================================
+==================== READ THIS BEFORE CONTINUING ====================
+=====================================================================
+
+Kickstart.nvim is *not* a distribution.
+
+Kickstart.nvim is a template for your own configuration.
+  The goal is that you can read every line of code, top-to-bottom, understand
+  what your configuration is doing, and modify it to suit your needs.
+
+  Once you've done that, you should start exploring, configuring and tinkering to
+  explore Neovim!
+
+  If you don't know anything about Lua, I recommend taking some time to read through
+  a guide. One possible example:
+  - https://learnxinyminutes.com/docs/lua/
+
+  And then you can explore or search through `:help lua-guide`
+
+
+Kickstart Guide:
+
+I have left several `:help X` comments throughout the init.lua
+You should run that command and read that help section for more information.
+
+In addition, I have some `NOTE:` items throughout the file.
+These are for you, the reader to help understand what is happening. Feel free to delete
+them once you know what you're doing, but they should serve as a guide for when you
+are first encountering a few different constructs in your nvim config.
+
+I hope you enjoy your Neovim journey,
+- TJ
+
+P.S. You can delete this when you're done too. It's your config now :)
+--]]
+-- Set <space> as the leader key
+-- See `:help mapleader`
+--  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
+vim.g.mapleader = ';'
+vim.g.maplocalleader = ';'
 
 -- Install package manager
 --    https://github.com/folke/lazy.nvim
@@ -32,9 +69,6 @@ require('lazy').setup({
   'tpope/vim-fugitive',
   'tpope/vim-rhubarb',
 
-  -- Zig
-  'ziglang/zig.vim',
-
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
 
@@ -50,7 +84,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       tag = 'legacy', opts = {} },
 
       -- Additional lua configuration, makes nvim stuff amazing!
       'folke/neodev.nvim',
@@ -74,7 +108,7 @@ require('lazy').setup({
   },
 
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',          opts = {} },
   {
     -- Adds git releated signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -88,11 +122,21 @@ require('lazy').setup({
         changedelete = { text = '~' },
       },
       on_attach = function(bufnr)
-        vim.keymap.set('n', '[c', require('gitsigns').prev_hunk, { buffer = bufnr, desc = 'Go to Previous Hunk' })
-        vim.keymap.set('n', ']c', require('gitsigns').next_hunk, { buffer = bufnr, desc = 'Go to Next Hunk' })
+        vim.keymap.set('n', '<leader>gp', require('gitsigns').prev_hunk,
+          { buffer = bufnr, desc = '[G]o to [P]revious Hunk' })
+        vim.keymap.set('n', '<leader>gn', require('gitsigns').next_hunk, { buffer = bufnr, desc = '[G]o to [N]ext Hunk' })
         vim.keymap.set('n', '<leader>ph', require('gitsigns').preview_hunk, { buffer = bufnr, desc = '[P]review [H]unk' })
       end,
     },
+  },
+
+  {
+    -- Theme inspired by Atom
+    'navarasu/onedark.nvim',
+    priority = 1000,
+    config = function()
+      vim.cmd.colorscheme 'onedark'
+    end,
   },
 
   {
@@ -121,7 +165,7 @@ require('lazy').setup({
   },
 
   -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} },
+  { 'numToStr/Comment.nvim',         opts = {} },
 
   -- Fuzzy Finder (files, lsp, etc)
   { 'nvim-telescope/telescope.nvim', branch = '0.1.x', dependencies = { 'nvim-lua/plenary.nvim' } },
@@ -154,9 +198,10 @@ require('lazy').setup({
   -- require 'kickstart.plugins.autoformat',
   -- require 'kickstart.plugins.debug',
 
-  -- NOTE: The import below automatically adds your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
+  -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    You can use this folder to prevent any conflicts with this init.lua if you're interested in keeping
   --    up-to-date with whatever is in the kickstart repo.
+  --    Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --
   --    For additional information see: https://github.com/folke/lazy.nvim#-structuring-your-plugins
   { import = 'custom.plugins' },
@@ -186,7 +231,7 @@ vim.o.breakindent = true
 -- Save undo history
 vim.o.undofile = true
 
--- Case insensitive searching UNLESS /C or capital in search
+-- Case-insensitive searching UNLESS \C or capital in search
 vim.o.ignorecase = true
 vim.o.smartcase = true
 
@@ -195,7 +240,6 @@ vim.wo.signcolumn = 'yes'
 
 -- Decrease update time
 vim.o.updatetime = 250
-vim.o.timeout = true
 vim.o.timeoutlen = 300
 
 -- Set completeopt to have a better completion experience
@@ -266,10 +310,10 @@ require('nvim-treesitter.configs').setup {
   ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'typescript', 'vimdoc', 'vim' },
 
   -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
-  auto_install = false,
+  auto_install = true,
 
   highlight = { enable = true },
-  indent = { enable = true, disable = { 'python' } },
+  indent = { enable = true },
   incremental_selection = {
     enable = true,
     keymaps = {
@@ -381,12 +425,16 @@ end
 --
 --  Add any additional override configuration in the following tables. They will be passed to
 --  the `settings` field of the server config. You must look up that documentation yourself.
+--
+--  If you want to override the default filetypes that your language server will attach to you can
+--  define the property 'filetypes' to the map in question.
 local servers = {
   -- clangd = {},
   -- gopls = {},
   -- pyright = {},
   -- rust_analyzer = {},
   -- tsserver = {},
+  -- html = { filetypes = { 'html', 'twig', 'hbs'} },
 
   lua_ls = {
     Lua = {
@@ -416,8 +464,9 @@ mason_lspconfig.setup_handlers {
       capabilities = capabilities,
       on_attach = on_attach,
       settings = servers[server_name],
+      filetypes = (servers[server_name] or {}).filetypes,
     }
-  end,
+  end
 }
 
 -- [[ Configure nvim-cmp ]]
@@ -469,4 +518,60 @@ cmp.setup {
 }
 
 -- The line beneath this is called `modeline`. See `:help modeline`
--- vim: ts=2 sts=2 sw=2 et
+
+-- show existing tab with 4 spaces width
+vim.opt.tabstop = 4
+
+-- when indenting with '>', use 4 spaces width
+vim.opt.shiftwidth = 4
+
+-- On pressing tab, insert 4 spaces
+vim.opt.expandtab = true
+
+-- REPL
+vim.cmd("nnoremap <leader>rt :ReplToggle<CR>")
+vim.cmd("nnoremap <leader>rc :ReplRunCell<CR>")
+vim.cmd("nmap <leader>rr <Plug>ReplSendLine")
+vim.cmd("vmap <leader>rr <Plug>ReplSendVisual")
+vim.g.repl_filetype_commands = { python = 'ipython --no-autoindent', }
+vim.g.repl_split = "bottom"
+vim.g.repl_height = 15
+vim.cmd([[
+  augroup vimrc_python
+    au!
+    au FileType python :ReplToggle
+    au FileType python :tnoremap <Esc> <C-\><C-n>
+  augroup END
+]])
+
+-- auto format on save
+vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
+
+
+
+-- -- SLIME config
+-- vim.g.slime_target = "neovim"
+--
+-- -- Automatically open a terminal when filetype is python
+-- function Open_terminal_if_python()
+--   local current_filetype = vim.bo.filetype
+--
+--   if current_filetype == "python" then
+--     vim.cmd("belowright 15 split | terminal ipython")
+--     vim.cmd("setlocal nonumber")
+--     vim.cmd("let g:term_id = b:terminal_job_id")
+--     vim.cmd("let g:slime_default_config" .. "= { \"jobid\":\"" .. vim.g.term_id .. "\"}")
+--     vim.cmd("let g:slime_dont_ask_default = 1")
+--     vim.cmd("wincmd p")
+--
+--   end
+-- end
+-- -- Automatically scroll down in a terminal buffer
+-- vim.cmd([[
+-- augroup AutoScrollTerminal
+--     autocmd!
+--     autocmd TextChanged term://* :normal! G
+-- augroup END
+-- ]])
+-- vim.cmd("autocmd VimEnter * lua Open_terminal_if_python()")
+-- vim.cmd("tnoremap <Esc> <C-\\><C-n>")
