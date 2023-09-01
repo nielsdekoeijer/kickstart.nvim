@@ -547,7 +547,8 @@ vim.cmd([[
 -- auto format on save
 vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
 
-
+-- project local config
+vim.o.exrc = true
 
 -- -- SLIME config
 -- vim.g.slime_target = "neovim"
